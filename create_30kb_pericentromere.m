@@ -26,6 +26,26 @@ for z = 1:bead_num
     end
 end
 
+% find the halfway point
+half = bead_num/2;
+
+% make the middle loop
+springs_extra{1} = sprintf('  spring %d %d %.1g %.6g',half-2,half+2,spring_rest,spring_const);
+
+% set the start and end points for the extra loops
+loops_start_us = half - 7;
+loops_start_ds = half + 7;
+
+% add the upstream loops
+for z = 1:20
+    springs_extra{z+1} = sprintf('  spring %d %d %.1g %.6g',loops_start_us-4-(6*(z-1)),loops_start_us-(6*(z-1)),spring_rest,spring_const);
+end
+
+% add the downstream loops
+for z = 1:20
+    springs_extra{z+21} = sprintf('  spring %d %d %.1g %.6g',loops_start_ds+(6*(z-1)),loops_start_ds+4+(6*(z-1)),spring_rest,spring_const);
+end
+
 % open up the file
 fid_out = fopen('30kb_peri.cfg','w');
 
@@ -46,6 +66,11 @@ for z = 1:bead_num
         fprintf(fid_out,'%s\r\n',hinge_create{z-2});
     else
     end
+end
+
+% print the extra springs
+for z = 1:size(springs_extra,2)
+    fprintf(fid_out,'%s\r\n',springs_extra{z});
 end
 
 % print out the end of the structure
